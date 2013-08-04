@@ -14,8 +14,14 @@ import java.util.Stack;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import javax.swing.ImageIcon;
-
-
+import com.zipebook.util.StandardUtils.*;
+/**
+ * 
+ * a class for handling zip files 
+ * and related tree methods
+ * 
+ * @author Bhathiya 
+ */
 public class ZipUtil {
     public static final ImageIcon FOLDER    = new ImageIcon(ZipEbook.class.getResource("/res/Folder.png"));
     public static final ImageIcon VIEWABLE_FILE  = new ImageIcon(ZipEbook.class.getResource("/res/Document-New.png"));
@@ -95,7 +101,7 @@ public class ZipUtil {
         for(int p=pos;p<fileList.size();p++){
             entry = fileList.get(p);
             name = entry.getName();
-            if(name.toLowerCase().endsWith("/")){
+            if(entry.isDirectory()){ 
                 node = new SimpleTreeNode(new TreeDataObject(getName(entry), FOLDER,entry.getName())); 
                 pair=stack.pop();
                 while(!isParent(name,pair.getFirst())){
@@ -171,53 +177,5 @@ public class ZipUtil {
     
     }
     
-    private static class Pair<A, B> {
-        private final A first;
-        private final B second;
-
-        public Pair(A first, B second) {
-            super();
-            this.first = first;
-            this.second = second;
-        }
-
-        @Override
-        public int hashCode() {
-            int hashFirst = first != null ? first.hashCode() : 0;
-            int hashSecond = second != null ? second.hashCode() : 0;
-
-            return (hashFirst + hashSecond) * hashSecond + hashFirst;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            if (other instanceof Pair) {
-                    Pair otherPair = (Pair) other;
-                    return 
-                    ((  this.first == otherPair.first ||
-                            ( this.first != null && otherPair.first != null &&
-                              this.first.equals(otherPair.first))) &&
-                     (	this.second == otherPair.second ||
-                            ( this.second != null && otherPair.second != null &&
-                              this.second.equals(otherPair.second))) );
-            }
-
-            return false;
-        }
-
-        @Override
-        public String toString()
-        { 
-               return "(" + first + ", " + second + ")"; 
-        }
-
-        public A getFirst() {
-            return first;
-        }
-
-        public B getSecond() {
-            return second;
-        }
-        
-    }
+    
 }
