@@ -42,7 +42,7 @@
       <SubComponents>
         <Component class="com.bhathigui.components.EasyTree" name="easyTree">
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new EasyTree(ZipEbook.archiveIcon, &quot;root&quot;)"/>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new EasyTree(IconProvider.archiveIcon, &quot;root&quot;)"/>
           </AuxValues>
         </Component>
       </SubComponents>

@@ -3,6 +3,7 @@ package com.zipebook.util;
 
 import com.bhathigui.components.EasyTree.SimpleTreeNode;
 import com.bhathigui.components.EasyTree.TreeDataObject;
+import com.zipebook.gui.IconProvider;
 import com.zipebook.gui.ZipEbook;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -10,10 +11,8 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Stack;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import javax.swing.ImageIcon;
 import com.zipebook.util.StandardUtils.*;
 /**
  * 
@@ -23,9 +22,7 @@ import com.zipebook.util.StandardUtils.*;
  * @author Bhathiya 
  */
 public class ZipUtil {
-    public static final ImageIcon FOLDER    = new ImageIcon(ZipEbook.class.getResource("/res/Folder.png"));
-    public static final ImageIcon VIEWABLE_FILE  = new ImageIcon(ZipEbook.class.getResource("/res/Document-New.png"));
-    public static final ImageIcon ANY_FILE   = new ImageIcon(ZipEbook.class.getResource("/res/Document-02.png"));
+
     private static ZipFile zipFile=null;
     private static ArrayList<ZipEntry> fileList=null;
     /**
@@ -94,35 +91,40 @@ public class ZipUtil {
         String name;
         SimpleTreeNode node;
         ZipEntry entry;
-        Stack<Pair<String,SimpleTreeNode>> stack= new Stack<Pair<String,SimpleTreeNode>>();
+        PeekToEndStack<Pair<String,SimpleTreeNode>> stack= new PeekToEndStack<Pair<String,SimpleTreeNode>>();
         SimpleTreeNode currentParent;
         Pair<String,SimpleTreeNode> pair;
         stack.add(new Pair<String, SimpleTreeNode>("", root));
+        stack.add(new Pair<String, SimpleTreeNode>("", root));
+        stack.add(new Pair<String, SimpleTreeNode>("", root));
         for(int p=pos;p<fileList.size();p++){
+
             entry = fileList.get(p);
             name = entry.getName();
+            
+            stack.resetPeekToEnd();
             if(entry.isDirectory()){ 
-                node = new SimpleTreeNode(new TreeDataObject(getName(entry), FOLDER,entry.getName())); 
-                pair=stack.pop();
+                node = new SimpleTreeNode(new TreeDataObject(getName(entry), IconProvider.folderIcon,entry.getName())); 
+                pair=stack.peekToEnd();
                 while(!isParent(name,pair.getFirst())){
-                    pair=stack.pop();
+                    pair=stack.peekToEnd();
                 }
                 stack.push(pair);
                 currentParent = pair.getSecond();
                 currentParent.add(node);
                 stack.push(new Pair<String, SimpleTreeNode>(name, node));
             }else{
-                if(name.toLowerCase().endsWith(".htm")
-                       || name.toLowerCase().endsWith(".html") || name.toLowerCase().endsWith(".xhtml")
-                       || name.toLowerCase().endsWith(".xml") || name.toLowerCase().endsWith(".txt") 
-                        ){
-                    node = new SimpleTreeNode(new TreeDataObject(getName(entry), VIEWABLE_FILE,entry.getName()));  
-                }else{
-                    node = new SimpleTreeNode(new TreeDataObject(getName(entry), ANY_FILE,entry.getName()));  
-                }
-                pair=stack.pop();
+//                if(name.toLowerCase().endsWith(".htm")
+//                       || name.toLowerCase().endsWith(".html") || name.toLowerCase().endsWith(".xhtml")
+//                       || name.toLowerCase().endsWith(".xml") || name.toLowerCase().endsWith(".txt") 
+//                        ){
+//                    node = new SimpleTreeNode(new TreeDataObject(getName(entry), VIEWABLE_FILE,entry.getName()));  
+//                }else{
+                    node = new SimpleTreeNode(new TreeDataObject(getName(entry), IconProvider.provide(name),entry.getName()));  
+//                }
+                pair=stack.peekToEnd();
                 while(!isParent(name,pair.getFirst())){
-                    pair=stack.pop();
+                    pair=stack.peekToEnd();
                 }
                 stack.push(pair);
                 currentParent = pair.getSecond();
@@ -136,8 +138,9 @@ public class ZipUtil {
         try{
             ZipFile file = zipFile;
             for (Enumeration<? extends ZipEntry> e = file.entries(); e.hasMoreElements(); )  
-            {  
-                fileList.add(e.nextElement());
+            {  ZipEntry z = e.nextElement();
+                fileList.add(z);
+                System.out.println(z.getName());
             }
             addtoTree(root, 0,false);
         }catch(Exception e){
@@ -167,6 +170,7 @@ public class ZipUtil {
     }
     
     private static boolean isParent(String child,String parent){
+        if (parent.isEmpty()) return true;
         String toTest=child;
         if(child.endsWith("/")){
             toTest = child.substring(0,child.length()-1);
@@ -176,6 +180,13 @@ public class ZipUtil {
         return (toTest.startsWith(parent) && remainder.indexOf("/")==-1);
     
     }
-    
+    private static String getParent(String child){
+        String toTest=child;
+        if(child.endsWith("/")){
+            toTest = child.substring(0,child.length()-1);
+        }
+       
+        return toTest.substring(0, toTest.lastIndexOf("/")-1);
+        }    
     
 }

@@ -21,6 +21,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import com.zipebook.util.*;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -32,7 +33,9 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.border.EmptyBorder;
 
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -53,7 +56,7 @@ public class ZipEbook extends JFrame {
     private static javax.swing.JMenu mnuFile;
     private static javax.swing.JMenu mnuHelp;
     private static JTabbedPane tabbedPane;
-    public static final ImageIcon archiveIcon    = new ImageIcon(ZipEbook.class.getResource("/res/Archive.png"));
+    
     
     public ZipEbook() {
       initComponents();
@@ -74,7 +77,7 @@ public class ZipEbook extends JFrame {
         book.setBorder(BorderFactory.createEmptyBorder());
         tabbedPane = new JTabbedPane();   
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT); 
-        
+        tabbedPane.setBorder(new EmptyBorder(0, 0, 0, 0));
         webBrowser = new JWebBrowser(JWebBrowser.destroyOnFinalization());
         webBrowser.setMenuBarVisible(false);
         //################################################################
@@ -98,9 +101,9 @@ public class ZipEbook extends JFrame {
         //title change and first load inner html file
         webBrowser.navigate(WebServer.getDefaultWebServer().getURLPrefix()+"/docs/index.html");
         addWebBrowserListener(tabbedPane, webBrowser);             
-        tabbedPane.addTab("Log", sysLogPane);   
-        createTabBrowserWithClose(tabbedPane.getTabCount(), webBrowser, "Startup page",true);
-        tabbedPane.setSelectedIndex(1);
+        //tabbedPane.addTab("Log", sysLogPane);   
+        createTabBrowserWithClose(tabbedPane.getTabCount(), webBrowser, "Startup page",true,Color.RED);
+        tabbedPane.setSelectedIndex(0);
         book.add(tabbedPane, BorderLayout.CENTER);
 
         
@@ -130,33 +133,24 @@ public class ZipEbook extends JFrame {
         
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        javax.swing.GroupLayout leftLayout = new javax.swing.GroupLayout(left);
-        
-        
-        leftLayout.setHorizontalGroup(
-            leftLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 500, Short.MAX_VALUE)
-        );
-        leftLayout.setVerticalGroup(
-            leftLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 353, Short.MAX_VALUE)
-        );
 
-        add(left, java.awt.BorderLayout.LINE_START);
+        JSplitPane jSplitPane = new JSplitPane();
+        jSplitPane.setBorder(new EmptyBorder(0, 0, 0, 0));
+        jSplitPane.setLeftComponent(left);
+        //add(left, java.awt.BorderLayout.LINE_START);
         
         //################################################################
-        //add book pane
-        javax.swing.GroupLayout centerLayout = new javax.swing.GroupLayout(book);
-        centerLayout.setHorizontalGroup(
-            centerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 405, Short.MAX_VALUE)
-        );
-        centerLayout.setVerticalGroup(
-            centerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 353, Short.MAX_VALUE)
-        );
-
-        add(book, java.awt.BorderLayout.CENTER);
+        
+        JSplitPane jSplitPaneright = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        jSplitPaneright.setBorder(new EmptyBorder(0, 0, 0, 0));
+        jSplitPaneright.setResizeWeight(0.85);
+        jSplitPaneright.setTopComponent(book);
+        
+        jSplitPaneright.setRightComponent(sysLogPane);
+        
+        jSplitPane.setRightComponent(jSplitPaneright);
+        
+        add(jSplitPane, java.awt.BorderLayout.CENTER);
         //################################################################
         //menu
         jMenuBar = new javax.swing.JMenuBar();
@@ -228,7 +222,7 @@ public class ZipEbook extends JFrame {
         public void windowWillOpen(WebBrowserWindowWillOpenEvent e) {   
           JWebBrowser newWebBrowser = new JWebBrowser(JWebBrowser.destroyOnFinalization());   
           addWebBrowserListener(tabbedPane, newWebBrowser); 
-          createTabBrowserWithClose(tabbedPane.getTabCount(), newWebBrowser, "New Tab",false);
+          createTabBrowserWithClose(tabbedPane.getTabCount(), newWebBrowser, "New Tab",false,Color.BLACK);
           //tabbedPane.addTab("New Tab", newWebBrowser);   
           e.setNewWebBrowser(newWebBrowser); 
           
@@ -245,9 +239,9 @@ public class ZipEbook extends JFrame {
     
     //#################################################################
     //tab stuff
-    private static void createTabBrowserWithClose(int index,JWebBrowser brows,String title,boolean hideClose){
+    private static void createTabBrowserWithClose(int index,JWebBrowser brows,String title,boolean hideClose,Color color){
         tabbedPane.addTab(title, brows);
-        TabPanel pnlTab= new TabPanel(title,hideClose);
+        TabPanel pnlTab= new TabPanel(title,hideClose,color);
         tabbedPane.setTabComponentAt(index, pnlTab);
        
         pnlTab.getBtnClose().addActionListener(new TabCloseActionHandler(brows, index));
@@ -263,7 +257,7 @@ public class ZipEbook extends JFrame {
         if(openFile.getSelectedFile()!=null){
             ZipUtil.updateZip(openFile.getSelectedFile().getAbsolutePath());
             left.getEasyTree().getRoot().removeAllChildren();
-            left.getEasyTree().getRoot().setUserObject(new EasyTree.TreeDataObject(openFile.getName(openFile.getSelectedFile()), archiveIcon));
+            left.getEasyTree().getRoot().setUserObject(new EasyTree.TreeDataObject(openFile.getName(openFile.getSelectedFile()), IconProvider.archiveIcon));
             ZipUtil.createNode(left.getEasyTree().getRoot());
             ((DefaultTreeModel)left.getEasyTree().getModel()).reload();
         }
@@ -331,14 +325,15 @@ public class ZipEbook extends JFrame {
         private JLabel lblTitle;
         private JButton closeButton;
         
-        public TabPanel(String title,boolean hideClose) {
+        public TabPanel(String title,boolean hideClose,Color color) {
             super(new BorderLayout());
-            initComponents(title,hideClose);
+            initComponents(title,hideClose,color);
         }
-        private void initComponents(String title,boolean hideClose){
+        private void initComponents(String title,boolean hideClose,Color color){
             setOpaque(false);
             setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 0));
             lblTitle = new JLabel(title);
+            lblTitle.setForeground(color);
             closeButton = new JButton(closerImage);
             closeButton.setRolloverIcon(closerRolloverImage);
             closeButton.setPressedIcon(closerPressedImage);

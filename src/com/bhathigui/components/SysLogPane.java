@@ -56,6 +56,7 @@ public class SysLogPane extends javax.swing.JPanel {
         lstLog.setBackground(new java.awt.Color(204, 204, 255));
         lstLog.setForeground(new java.awt.Color(110, 110, 110));
         lstLog.setModel(new DefaultListModel());
+        lstLog.setPreferredSize(new java.awt.Dimension(0, 250));
         lstLog.setSelectionBackground(new java.awt.Color(204, 255, 153));
         lstLog.setSelectionForeground(new java.awt.Color(255, 153, 153));
         jspLog.setViewportView(lstLog);

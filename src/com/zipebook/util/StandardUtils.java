@@ -1,12 +1,17 @@
 package com.zipebook.util;
 
 
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Toolkit;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.util.Stack;
+
 
 
 
@@ -16,6 +21,24 @@ import java.nio.ByteBuffer;
  */
 public class StandardUtils {
     
+    /**
+     * screen width 
+     * @return 
+     */
+    public static int getScreenWidth(){
+       GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+       int width = gd.getDisplayMode().getWidth();
+       return Math.max(Toolkit.getDefaultToolkit().getScreenSize().width,width);
+    }
+    /**
+     * 
+     * @return screen height 
+     */
+     public static int getScreenHeight(){
+       GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+       int height = gd.getDisplayMode().getHeight();
+       return Math.max(Toolkit.getDefaultToolkit().getScreenSize().height,height);
+    }   
     /**
      * is null or empty
      * @param string
@@ -86,7 +109,7 @@ public class StandardUtils {
      * @param bufferSize
      * @return 
      */
-    public static String slurp(final InputStream is, final int bufferSize){
+    public static String InputStreamToString(final InputStream is, final int bufferSize){
         final char[] buffer = new char[bufferSize];
         final StringBuilder out = new StringBuilder();
         try {
@@ -231,7 +254,22 @@ public class StandardUtils {
             }
             return true;
         }
-        
+  
+    }
+
+    
+    public static class PeekToEndStack<T> extends Stack<T>{
+        int peekPos=0;
+
+        public synchronized void resetPeekToEnd(){
+            peekPos=size()-1;
+        }
+        public synchronized T peekToEnd(){
+            return elementAt(peekPos--);
+        }
+        public synchronized boolean isPeekPosNegative(){
+            return peekPos<=0;
+        }
         
     }
 }

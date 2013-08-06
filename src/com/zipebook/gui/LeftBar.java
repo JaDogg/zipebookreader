@@ -35,7 +35,7 @@ public class LeftBar extends javax.swing.JPanel {
     private void initComponents() {
 
         jspTree = new javax.swing.JScrollPane();
-        easyTree = new EasyTree(ZipEbook.archiveIcon, "root");
+        easyTree = new EasyTree(IconProvider.archiveIcon, "root");
 
         jspTree.setBorder(javax.swing.BorderFactory.createTitledBorder("ZipViewer"));
         jspTree.setViewportView(easyTree);
