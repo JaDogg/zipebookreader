@@ -13,6 +13,7 @@ import chrriis.dj.nativeswing.swtimpl.components.WebBrowserWindowWillOpenEvent;
 import com.bhathigui.components.EasyTree;
 import com.bhathigui.components.EasyTree.SimpleTreeNode;
 import com.bhathigui.components.EasyTree.TreeDataObject;
+import com.bhathigui.components.RSyntaxEmbedComponent;
 import com.bhathigui.components.SysLogPane;
 import java.awt.BorderLayout;
 import java.io.InputStream;
@@ -51,12 +52,12 @@ public class ZipEbook extends JFrame {
     private static javax.swing.JMenuBar jMenuBar;
     private static javax.swing.JMenuItem mitAbout;
     private static javax.swing.JMenuItem mitClose;
-    private static javax.swing.JMenuItem mitLoadMySelf;
+    //private static javax.swing.JMenuItem mitLoadMySelf;
     private static javax.swing.JMenuItem mitOpen;
     private static javax.swing.JMenu mnuFile;
     private static javax.swing.JMenu mnuHelp;
     private static JTabbedPane tabbedPane;
-    
+    private static RSyntaxEmbedComponent syntaxEmbedComponent;
     
     public ZipEbook() {
       initComponents();
@@ -80,6 +81,7 @@ public class ZipEbook extends JFrame {
         tabbedPane.setBorder(new EmptyBorder(0, 0, 0, 0));
         webBrowser = new JWebBrowser(JWebBrowser.destroyOnFinalization());
         webBrowser.setMenuBarVisible(false);
+        syntaxEmbedComponent = new RSyntaxEmbedComponent();
         //################################################################
         //custom webserver comtent receiver through zip util
         WebServer.getDefaultWebServer().addContentProvider(new WebServer.WebServerContentProvider() {
@@ -102,7 +104,8 @@ public class ZipEbook extends JFrame {
         webBrowser.navigate(WebServer.getDefaultWebServer().getURLPrefix()+"/docs/index.html");
         addWebBrowserListener(tabbedPane, webBrowser);             
         //tabbedPane.addTab("Log", sysLogPane);   
-        createTabBrowserWithClose(tabbedPane.getTabCount(), webBrowser, "Startup page",true,Color.RED);
+        createTabBrowserWithClose(0, webBrowser, "Startup page",true,Color.RED);
+        createTabPanel(1,syntaxEmbedComponent,"Syntax Viewer",Color.BLUE);
         tabbedPane.setSelectedIndex(0);
         book.add(tabbedPane, BorderLayout.CENTER);
 
@@ -123,7 +126,14 @@ public class ZipEbook extends JFrame {
                     }
                     else if(e.getClickCount() == 2) {
                         TreeDataObject t = (TreeDataObject)((SimpleTreeNode)selPath.getLastPathComponent()).getUserObject();
-                        webBrowser.navigate(WebServer.getDefaultWebServer().getURLPrefix()+"/" + t.getObject());
+                        if(tabbedPane.getSelectedIndex() == 1){
+                            syntaxEmbedComponent.setText(zipfile.getInputStream("/" + t.getObject().toString()));
+                        }else{
+//                                                        ((JWebBrowser)
+//                                    tabbedPane.getComponentAt(tabbedPane.getSelectedIndex())).navigate(
+//                                    WebServer.getDefaultWebServer().getURLPrefix()+"/" + t.getObject());
+                            webBrowser.navigate(WebServer.getDefaultWebServer().getURLPrefix()+"/" + t.getObject());
+                        }
                     }
                 }
             }
@@ -156,7 +166,7 @@ public class ZipEbook extends JFrame {
         jMenuBar = new javax.swing.JMenuBar();
         mnuFile = new javax.swing.JMenu();
         mitOpen = new javax.swing.JMenuItem();
-        mitLoadMySelf = new javax.swing.JMenuItem();
+        //mitLoadMySelf = new javax.swing.JMenuItem();
         mitClose = new javax.swing.JMenuItem();
         mnuHelp = new javax.swing.JMenu();
         mitAbout = new javax.swing.JMenuItem();
@@ -174,12 +184,7 @@ public class ZipEbook extends JFrame {
             }
         });
         mnuFile.add(mitOpen);
-        mnuFile.add(new javax.swing.JPopupMenu.Separator());
 
-        mitLoadMySelf.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
-        mitLoadMySelf.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/Data-Synchronize.png"))); // NOI18N
-        mitLoadMySelf.setText("Load Self As Zip");
-        mnuFile.add(mitLoadMySelf);
         mnuFile.add(new javax.swing.JPopupMenu.Separator());
 
         mitClose.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_MASK));
@@ -245,6 +250,13 @@ public class ZipEbook extends JFrame {
         tabbedPane.setTabComponentAt(index, pnlTab);
        
         pnlTab.getBtnClose().addActionListener(new TabCloseActionHandler(brows, index));
+        
+    }
+    private static void createTabPanel(int index,JPanel item,String title,Color color){
+        tabbedPane.addTab(title, item);
+        TabPanel pnlTab= new TabPanel(title,true,color);
+        tabbedPane.setTabComponentAt(index, pnlTab);
+
         
     }
     //#################################################################
