@@ -3,7 +3,7 @@ package com.zipebook.util;
 
 import com.bhathigui.components.EasyTree.SimpleTreeNode;
 import com.bhathigui.components.EasyTree.TreeDataObject;
-import com.zipebook.gui.IconProvider;
+import com.bhathigui.components.util.IconProvider;
 import com.zipebook.gui.ZipEbook;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
