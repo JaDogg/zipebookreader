@@ -30,7 +30,7 @@ public class ZipUtil {
      */
     public ZipUtil() {
         fileList = new ArrayList<ZipEntry>();
-        loadSelf();
+        //loadSelf();
 
     }
     
@@ -87,7 +87,7 @@ public class ZipUtil {
             ZipEbook.getSysLogPane().addToSystemLog(ex);
         }
     }    
-    private static int addtoTree(SimpleTreeNode root,int pos,boolean breakChild){
+    private static int addtoTree(SimpleTreeNode root,int pos){
         String name;
         SimpleTreeNode node;
         ZipEntry entry;
@@ -114,14 +114,8 @@ public class ZipUtil {
                 currentParent.add(node);
                 stack.push(new Pair<String, SimpleTreeNode>(name, node));
             }else{
-//                if(name.toLowerCase().endsWith(".htm")
-//                       || name.toLowerCase().endsWith(".html") || name.toLowerCase().endsWith(".xhtml")
-//                       || name.toLowerCase().endsWith(".xml") || name.toLowerCase().endsWith(".txt") 
-//                        ){
-//                    node = new SimpleTreeNode(new TreeDataObject(getName(entry), VIEWABLE_FILE,entry.getName()));  
-//                }else{
-                    node = new SimpleTreeNode(new TreeDataObject(getName(entry), IconProvider.provide(name),entry.getName()));  
-//                }
+                node = new SimpleTreeNode(new TreeDataObject(getName(entry), IconProvider.provide(name),entry.getName()));  
+
                 pair=stack.peekToEnd();
                 while(!isParent(name,pair.getFirst())){
                     pair=stack.peekToEnd();
@@ -142,7 +136,7 @@ public class ZipUtil {
                 fileList.add(z);
                 System.out.println(z.getName());
             }
-            addtoTree(root, 0,false);
+            addtoTree(root, 0);
         }catch(Exception e){
             ZipEbook.getSysLogPane().addToSystemLog(e);
         }
@@ -171,13 +165,7 @@ public class ZipUtil {
     
     private static boolean isParent(String child,String parent){
         if (parent.isEmpty()) return true;
-        String toTest=child;
-        if(child.endsWith("/")){
-            toTest = child.substring(0,child.length()-1);
-        }
-        String remainder=toTest.replace(parent, "");
-        
-        return (toTest.startsWith(parent) && remainder.indexOf("/")==-1);
+        return parent.equals(getParent(child));
     
     }
     private static String getParent(String child){

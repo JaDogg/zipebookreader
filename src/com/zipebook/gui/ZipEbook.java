@@ -14,6 +14,7 @@ import chrriis.dj.nativeswing.swtimpl.components.WebBrowserWindowWillOpenEvent;
 import com.bhathigui.components.EasyTree;
 import com.bhathigui.components.EasyTree.SimpleTreeNode;
 import com.bhathigui.components.EasyTree.TreeDataObject;
+import com.bhathigui.components.FileTree.FileNode;
 import com.bhathigui.components.RSyntaxEmbedComponent;
 import com.bhathigui.components.SysLogPane;
 import java.awt.BorderLayout;
@@ -30,6 +31,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -38,6 +44,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -53,7 +60,6 @@ public class ZipEbook extends JFrame {
     private static javax.swing.JMenuBar jMenuBar;
     private static javax.swing.JMenuItem mitAbout;
     private static javax.swing.JMenuItem mitClose;
-    //private static javax.swing.JMenuItem mitLoadMySelf;
     private static javax.swing.JMenuItem mitOpen;
     private static javax.swing.JMenu mnuFile;
     private static javax.swing.JMenu mnuHelp;
@@ -81,7 +87,7 @@ public class ZipEbook extends JFrame {
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT); 
         tabbedPane.setBorder(new EmptyBorder(0, 0, 0, 0));
         webBrowser = new JWebBrowser(JWebBrowser.destroyOnFinalization());
-        webBrowser.setMenuBarVisible(false);
+       // webBrowser.setMenuBarVisible(false);
         syntaxEmbedComponent = new RSyntaxEmbedComponent();
         //################################################################
         //custom webserver comtent receiver through zip util
@@ -102,9 +108,9 @@ public class ZipEbook extends JFrame {
 
         //################################################################
         //title change and first load inner html file
-        webBrowser.navigate(WebServer.getDefaultWebServer().getURLPrefix()+"/docs/index.html");
+        webBrowser.navigate("http://jadogg.phatcode.net");
         addWebBrowserListener(tabbedPane, webBrowser);             
-        //tabbedPane.addTab("Log", sysLogPane);   
+
         createTabBrowserWithClose(0, webBrowser, "Startup page",true,Color.RED);
         createTabPanel(1,syntaxEmbedComponent,"Syntax Viewer",Color.BLUE);
         tabbedPane.setSelectedIndex(0);
@@ -139,9 +145,35 @@ public class ZipEbook extends JFrame {
                 }
             }
         };
-        
+        MouseListener mlFile = new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                int selRow = left.getFileTree().getM_tree().getRowForLocation(e.getX(), e.getY());
+                TreePath selPath = left.getFileTree().getM_tree().getPathForLocation(e.getX(), e.getY());
+                if(selRow != -1) {
+                    if(e.getClickCount() == 1) {
+                        //mySingleClick(selRow, selPath);
+                    }
+                    else if(e.getClickCount() == 2) {
+                        File t = left.getFileTree().getFileNode((DefaultMutableTreeNode)selPath.getLastPathComponent()).getFile();
+                        if(tabbedPane.getSelectedIndex() == 1){
+                            try {
+                                syntaxEmbedComponent.setText(new FileInputStream(t));
+                            } catch (FileNotFoundException ex) {
+
+                            }
+                        }else{
+//                                                        ((JWebBrowser)
+//                                    tabbedPane.getComponentAt(tabbedPane.getSelectedIndex())).navigate(
+//                                    WebServer.getDefaultWebServer().getURLPrefix()+"/" + t.getObject());
+                            webBrowser.navigate("file:///" + t.getAbsolutePath());
+                        }
+                    }
+                }
+            }
+        };        
         left.getEasyTree().addMouseListener(ml);
-        
+        left.getFileTree().getM_tree().addMouseListener(mlFile);
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
 
